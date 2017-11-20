@@ -1,21 +1,3 @@
-scalariformSettings
-
-val checkFormat = TaskKey[Unit]("check-format")
-
-checkFormat := {
-  (ScalariformKeys.format in Compile).value
-  val directory = baseDirectory.value.absolutePath
-  val logger = (streams in Compile).value.log
-  val paths = stringToProcess(s"git diff --name-only $directory").lines
-  if (paths.nonEmpty) {
-    logger.error("The following files are not corrected formatted:")
-    paths.foreach { path =>
-      logger.error(s"  $path")
-    }
-    logger.error("Run `sbt scalariform-format`")
-    throw new RuntimeException(s"${paths.size} files need formatting")
-  }
-}
 
 credentials += Credentials(
   "Sonatype Nexus Repository Manager",
@@ -58,4 +40,4 @@ startYear := Some(2017)
 
 version := sys.props.getOrElse("build.version", "0-SNAPSHOT")
 
-crossSbtVersions := Seq("0.13.16", "1.0.1")
+crossSbtVersions := Seq("0.13.16", "1.0.3")

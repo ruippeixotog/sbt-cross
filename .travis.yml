@@ -1,28 +1,19 @@
-after_success: |
-  if [ "$TRAVIS_SECURE_ENV_VARS" == true ]; then
-    echo "$PGP_SECRET" | base64 --decode | gpg --import
-    if [ -z "$TRAVIS_TAG" ]; then
-        (cd sbt-cross && exec sbt publishSigned)
-    else
-        (cd sbt-cross && exec sbt publishSigned sonatypeRelease)
-    fi
-  fi
+sudo: false
+
+language: scala
+jdk: oraclejdk8
+
+matrix:
+  include:
+    - scala: 2.10.7
+      env: TRAVIS_SBT_VERSION="0.13.16"
+    - scala: 2.12.4
+      env: TRAVIS_SBT_VERSION="1.0.3"
+
+script:
+  - (cd sbt-cross && sbt "++${TRAVIS_SCALA_VERSION}" "^^${TRAVIS_SBT_VERSION}" 'all package test')
+
 cache:
   directories:
     - $HOME/.ivy2
     - $HOME/.sbt
-deploy:
-  api_key: $GITHUB_AUTH
-  file: '*/target/**/*.jar'
-  file_glob: true
-  on:
-    tags: true
-  provider: releases
-  skip_cleanup: true
-git:
-  depth: 1
-jdk: openjdk7
-language: scala
-script:
-  - '[ "$TRAVIS_PULL_REQUEST" != false ] || export SBT_OPTS=-Dbuild.version=${TRAVIS_TAG:-$TRAVIS_BRANCH-SNAPSHOT}'
-  - (cd sbt-cross && exec sbt 'all checkFormat package test')
